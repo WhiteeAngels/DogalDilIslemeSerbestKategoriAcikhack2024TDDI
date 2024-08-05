@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request, jsonify
-from transformers import pipeline
+from transformers import pipeline,AutoModelForTokenClassification, AutoModelForSequenceClassification, AutoTokenizer,AutoModelForQuestionAnswering
 from gtts import gTTS
 import os
 import playsound
@@ -7,9 +7,20 @@ import playsound
 app = Flask(__name__)
 
 # Transformer model pipeline'ları
-classifier = pipeline("text-classification", model="nlptown/bert-base-multilingual-uncased-sentiment")
-sentiment_analyzer = pipeline("sentiment-analysis")
-qa_pipeline = pipeline("question-answering", model="distilbert-base-uncased-distilled-squad")
+classifier = pipeline("ner", model="akdeniz27/convbert-base-turkish-cased-ner")
+text_analysis_pipeline = pipeline("feature-extraction", model="dbmdz/bert-base-turkish-cased")
+
+# Yeni Duygu Analizi Modeli
+model_name = "gurkan08/turkish-product-comment-sentiment-classification"
+tokenizer = AutoTokenizer.from_pretrained(model_name)
+model = AutoModelForSequenceClassification.from_pretrained(model_name)
+sentiment_analyzer = pipeline("sentiment-analysis", model=model, tokenizer=tokenizer)
+
+# Yeni Soru-Cevap Modeli
+qa_model_name = "yunusemreemik/logo-qna-model"
+qa_tokenizer = AutoTokenizer.from_pretrained(qa_model_name)
+qa_model = AutoModelForQuestionAnswering.from_pretrained(qa_model_name)
+qa_pipeline = pipeline("question-answering", model=qa_model, tokenizer=qa_tokenizer)
 
 # Örnek mağaza ve ürün verileri
 stores_products = {
@@ -17,6 +28,12 @@ stores_products = {
     "Ikea": ["sandalye", "tornavida", "matkap", "çadır"],
     "Mediamarkt": ["cep telefonu", "laptop", "mouse", "kulaklık", "tablet bilgisayar"]
 }
+
+# Yeni Metin Sınıflandırma Modeli
+text_classification_model_name = "dbmdz/bert-base-turkish-cased"
+text_classification_tokenizer = AutoTokenizer.from_pretrained(text_classification_model_name)
+text_classification_model = AutoModelForSequenceClassification.from_pretrained(text_classification_model_name)
+text_classifier = pipeline("text-classification", model=text_classification_model, tokenizer=text_classification_tokenizer)
 
 @app.route('/')
 def index():
@@ -59,12 +76,16 @@ def analyze():
     return jsonify(result='Geçersiz analiz türü.')
 
 def classify_text(text):
+    # Text classification using a transformer model
     results = classifier(text)
     return results[0]['label']
 
+
 def analyze_sentiment(text):
     results = sentiment_analyzer(text)
-    return results[0]['label']
+    sentiment = results[0]['label']
+    return sentiment
+
 
 def answer_question(text, question):
     result = qa_pipeline({'context': text, 'question': question})

@@ -44,83 +44,53 @@ function analyzeText() {
     .then(response => response.json())
     .then(data => {
         alert(data.result);
-    })
-    .catch(error => console.error('Error:', error));
+    });
 }
+
 
 // Metin sınıflandırma işlevi
 function classifyText() {
     const text = document.getElementById('text-classification').value;
-    if (text.trim() === "") {
-        alert("Lütfen metin giriniz.");
-        return;
-    }
     fetch('/analyze', {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ text: text, type: 'text_classification' })
-    })
-    .then(response => response.json())
-    .then(data => {
-        alert(data.result);
-    })
-    .catch(error => console.error('Error:', error));
-}
-
-// Mağazalar ve ürünler
-const stores = {
-    'Nike': ['top', 'ayakkabı', 'çanta', 'forma', 'racket', 'toka'],
-    'Ikea': ['sandalye', 'tornavida', 'matkap', 'çadır'],
-    'Mediamarkt': ['cep telefonu', 'laptop', 'mouse', 'kulaklık', 'tablet bilgisayar']
-};
-
-// Ürün arama işlevi
-function searchProducts() {
-    const input = document.getElementById('product-search').value;
-    const products = input.split(',').map(p => p.trim().toLowerCase());
-
-    let foundStore = null;
-
-    for (const [store, storeProducts] of Object.entries(stores)) {
-        const allProductsFound = products.every(product => storeProducts.includes(product));
-
-        if (allProductsFound) {
-            foundStore = store;
-            break;
+    }).then(response => response.json())
+      .then(data => {
+        let result = "Metin sınıflandırması:\n";
+        for (let entity in data.result) {
+            result += `${entity}: ${data.result[entity]}\n`;
         }
-    }
-
-    const resultDiv = document.getElementById('result');
-    if (foundStore) {
-        resultDiv.textContent = `Ürünler mevcut: ${foundStore}`;
-    } else {
-        resultDiv.textContent = "Mağaza bulunamadı.";
-    }
+        alert(result);
+      })
+      .catch(error => console.error('Hata:', error));
 }
 
 
-// Soru yanıtlama işlevi
-function answerQuestion() {
-    const context = document.getElementById('qa-context').value;
-    const question = document.getElementById('qa-question').value;
-    if (context.trim() === "" || question.trim() === "") {
-        alert("Lütfen metin ve soru giriniz.");
-        return;
-    }
+
+// duygu analizi
+function analyzeSentiment() {
+    const text = document.getElementById('sentiment-analysis').value;
     fetch('/analyze', {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ text: context, type: 'question_answering', question: question })
-    })
-    .then(response => response.json())
-    .then(data => {
-        alert(data.result);
-    })
-    .catch(error => console.error('Error:', error));
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text: text, type: 'sentiment_analysis' })
+    }).then(response => response.json())
+      .then(data => alert(data.result))
+      .catch(error => console.error('Hata:', error));
+}
+
+// Soru-cevap işlevi
+function answerQuestion() {
+    const text = document.getElementById('qa-context').value;
+    const question = document.getElementById('qa-question').value;
+    fetch('/analyze', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text: text, type: 'question_answering', question: question })
+    }).then(response => response.json())
+      .then(data => alert(data.result))
+      .catch(error => console.error('Hata:', error));
 }
 
 // Metin okuma işlevi
@@ -157,7 +127,7 @@ function searchProducts() {
                 // Her bir ürün ve mağaza sonucunu bir HTML elemanı olarak ekleyin
                 const resultElement = document.createElement('div');
                 resultElement.classList.add('result-item');
-                resultElement.textContent = `Ürün: ${result.product} - Mağaza: ${result.store}`;
+                resultElement.textContent = `Ürünler mevcut: ${result.store}`;
                 resultsDiv.appendChild(resultElement);
             });
         } else {
@@ -169,6 +139,22 @@ function searchProducts() {
         const resultsDiv = document.getElementById('search-results');
         resultsDiv.innerHTML = "<p>Bir hata oluştu. Lütfen tekrar deneyin.</p>";
     });
+}
+
+function readText() {
+    const text = document.getElementById('text-to-read').value;
+    if (text.trim() === "") {
+        alert("Metin boş. Lütfen bir metin girin.");
+        return;
+    }
+
+    fetch('/speak', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: `text=${encodeURIComponent(text)}`
+    }).then(response => response.text())
+      .then(result => alert(result))
+      .catch(error => console.error('Hata:', error));
 }
 
 // Diğer işlem işlevleri
