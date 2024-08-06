@@ -16,28 +16,38 @@
 - **Can Ahmedi Yaşar Parlak:** [GitHub](https://github.com/canahmed)
 - **Uğur Çoruh (Danışman):** [GitHub](https://github.com/ucoruh)
 
-# Türkçe Dil İşleme Projesi
+# Proje Hakkında
 
-Bu proje, Türkçe metinlerin otomatik olarak sınıflandırılması, duygu analizi yapılması, metinlerin anlamının anlaşılması, soru-cevap işlemleri ve ürün almak için geliştirilmiştir.
+Bu proje, Türkçe metinlerin otomatik olarak ve entitylerin sınıflandırılması, duygu analizi yapılması, metinlerin anlamının anlaşılması, soru-cevap işlemleri, metin okuma ve ürün almak için geliştirilmiştir.
+# Model Açıklaması
+Kullandığımız modeller: 'dbmdz/bert-base-turkish-cased', 'yunusemreemik/logo-qna-model', 'gurkan08/turkish-product-comment-sentiment-classification', 'akdeniz27/convbert-base-turkish-cased-ner' veri setleri üzerinde eğitilmiştir.
 
-## Kurulum
-
-
+# DataSet Açıklaması
+Kendi Hugging Face'imizde oluşturduğumuz dataset kullanılmıştır. 'WhiteAngelss/magaza-urun-listesi-with-links'
 ### Gereksinimler
 
-transformers==4.11.3
-tf-keras==0.7.0
-torch==1.9.0
-torchvision==0.10.0
-torchaudio==0.9.0
-flask==2.0.1
-gunicorn==20.1.0
+transformers
+tf-keras
+torch
+torchvision
+torchaudio
+flask
+gunicorn
+rankit
 datasets
+pandass
 
 Gerekli kütüphaneleri yüklemek için:
 pip install -r requirements.txt
-
-
+# Kullanım Amacı
+Model; metin sınıflandırma, analizleri, soru-cevap ve okuma işlemlerini yapmaktadır. Ayrıca kullanıcının istediği ürünleri tek bir mağazada almasını sağlayacak model de içermektedir.  
+# Proje Mimarisi
+Bu proje beş ana bileşenden oluşmaktadır:
+1. **Metin Analizi**: Girilen metinin kaç kelime olduğunu analiz eder.
+2. **Metin Sınıflandırma**: Girilen metini entitylerine ayırarak entity sınıflandırması yapar.
+3. **Metin Soru-Cevap**: Girilen metinle ilgili soru sorarak cevap verdirmesi yapılır.
+4. **Metin Okuma**: Girilen metinin sesli bir şekilde okunması sağlanır.
+5. **Ürün Alma**: Girilen ürünlerin hepsini içeren mağaza listelenir.
 ## Kullanım
 
 Flask uygulamasını çalıştırmak için:
