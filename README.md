@@ -43,11 +43,11 @@ pip install -r requirements.txt
 Model; metin sınıflandırma, analizleri, soru-cevap ve okuma işlemlerini yapmaktadır. Ayrıca kullanıcının istediği ürünleri tek bir mağazada almasını sağlayacak model de içermektedir.  
 # Proje Mimarisi
 Bu proje beş ana bileşenden oluşmaktadır:
-Metin Analizi: Girilen metinin kaç kelime olduğunu analiz eder.
-Metin Sınıflandırma: Girilen metini entitylerine ayırarak entity sınıflandırması yapar.
-Metin Soru-Cevap: Girilen metinle ilgili soru sorarak cevap verdirmesi yapılır.
-Metin Okuma: Girilen metinin sesli bir şekilde okunması sağlanır.
-Ürün Alma: Girilen ürünlerin hepsini içeren mağaza listelenir.
+1. **Metin Analizi**: Girilen metinin kaç kelime olduğunu analiz eder.
+2. **Metin Sınıflandırma**: Girilen metini entitylerine ayırarak entity sınıflandırması yapar.
+3. **Metin Soru-Cevap**: Girilen metinle ilgili soru sorarak cevap verdirmesi yapılır.
+4. **Metin Okuma**: Girilen metinin sesli bir şekilde okunması sağlanır.
+5. **Ürün Alma**: Girilen ürünlerin hepsini içeren mağaza listelenir.
 ## Kullanım
 
 Flask uygulamasını çalıştırmak için:
