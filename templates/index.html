@@ -339,26 +339,61 @@ function analyzeText() {
 
 
         function analyzeSentiment() {
-            let text = document.getElementById("sentiment-analysis").value;
-            alert("Duygu Analizi: " + text);
+            const text = document.getElementById('sentiment-analysis').value;
+            fetch('/analyze', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ text: text, type: 'sentiment_analysis' })
+            }).then(response => response.json())
+              .then(data => alert(data.result))
+              .catch(error => console.error('Error:', error));
         }
 
         function answerQuestion() {
-            let context = document.getElementById("qa-context").value;
-            let question = document.getElementById("qa-question").value;
-            alert("Soru: " + question + "\nBağlam: " + context);
+            const text = document.getElementById('qa-context').value;
+            const question = document.getElementById('qa-question').value;
+            fetch('/analyze', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ text: text, type: 'question_answering', question: question })
+            }).then(response => response.json())
+              .then(data => alert(data.result))
+              .catch(error => console.error('Error:', error));
         }
 
+
         function readText() {
-            let text = document.getElementById("text-to-read").value;
-            alert("Metin Okuma: " + text);
+            const text = document.getElementById('text-to-read').value;
+            if (text.trim() === "") {
+                alert("Metin boş. Lütfen bir metin girin.");
+                return;
+            }
+
+            const utterance = new SpeechSynthesisUtterance(text);
+            speechSynthesis.speak(utterance);
         }
 
         function searchProducts() {
-            let text = document.getElementById("product-search").value;
-            alert("Ürün Arama: " + text);
-            document.getElementById("search-results").innerText = "Arama sonuçları burada gösterilecek.";
-        }
+        const products = document.getElementById('product-search').value;
+        fetch('/search_products', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ products: products })
+        }).then(response => response.json())
+          .then(data => {
+            const resultsDiv = document.getElementById('search-results');
+            if (data.results && data.results.length > 0) {
+                let resultsHtml = '<h3>Sonuçlar:</h3>';
+                data.results.forEach(result => {
+                    resultsHtml += `<p>Mağaza: ${result.store}<br>Ürünler: ${result.products.join(', ')}</p>`;
+                });
+                resultsDiv.innerHTML = resultsHtml;
+            } else {
+                resultsDiv.innerHTML = '<p>İstediğiniz ürünlerin hepsini tek bir mağazada bulamadık.</p>';
+            }
+          })
+          .catch(error => console.error('Error:', error));
+    }
     </script>
 </body>
 </html>
