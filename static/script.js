@@ -1,4 +1,4 @@
-// Overlay gösterim işlevi
+// Overlay gösterim işlevii
 function showAbout() {
     document.getElementById("about-overlay").style.display = "flex";
 }
