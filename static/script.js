@@ -49,21 +49,42 @@ function analyzeText() {
 
 
 // Metin sınıflandırma işlevi
+// Metin sınıflandırma işlevi
 function classifyText() {
-    const text = document.getElementById('text-classification').value;
+    let text = document.getElementById("text-classification").value;
+
+    if (text.trim() === "") {
+        alert("Lütfen metin giriniz.");
+        return;
+    }
+
     fetch('/analyze', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ text: text, type: 'text_classification' })
-    }).then(response => response.json())
-      .then(data => {
-        let result = "Metin sınıflandırması:\n";
-        for (let entity in data.result) {
-            result += `${entity}: ${data.result[entity]}\n`;
+    })
+    .then(response => response.json())
+    .then(data => {
+        let result = "Metin Sınıflandırma Sonuçları:\n";
+
+        const entityTypes = {
+            'PER': 'Kişi',
+            'LOC': 'Yer',
+            'ORG': 'Organizasyon'
+        };
+
+        for (const [entityType, entities] of Object.entries(data.result)) {
+            let entityTypeName = entityTypes[entityType] || 'Bilinmeyen';
+            result += `${entityTypeName}:\n`;
+            entities.forEach(entity => result += `- ${entity}\n`);
         }
+
         alert(result);
-      })
-      .catch(error => console.error('Hata:', error));
+    })
+    .catch(error => {
+        console.error('Hata:', error);
+        alert("Bir hata oluştu, lütfen tekrar deneyin.");
+    });
 }
 
 

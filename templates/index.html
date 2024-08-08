@@ -307,9 +307,36 @@ function analyzeText() {
 
 
         function classifyText() {
-            let text = document.getElementById("text-classification").value;
-            alert("Metin Sınıflandırma: " + text);
+    let text = document.getElementById("text-classification").value;
+
+    // Metin boş olup olmadığını kontrol et
+    if (text.trim() === "") {
+        alert("Lütfen metin giriniz.");
+        return;
+    }
+
+    // Metni sunucuya gönder
+    fetch('/analyze', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text: text, type: 'text_classification' })
+    })
+    .then(response => response.json())
+    .then(data => {
+        // Sonuçları kullanıcıya göster
+        let result = "Metin Sınıflandırma Sonuçları:\n";
+        for (const [entityType, entities] of Object.entries(data.result)) {
+            result += `${entityType}:\n`;
+            entities.forEach(entity => result += `- ${entity}\n`);
         }
+        alert(result);
+    })
+    .catch(error => {
+        console.error('Hata:', error);
+        alert("Bir hata oluştu, lütfen tekrar deneyin.");
+    });
+}
+
 
         function analyzeSentiment() {
             let text = document.getElementById("sentiment-analysis").value;

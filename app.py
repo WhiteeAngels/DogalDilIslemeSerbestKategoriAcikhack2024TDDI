@@ -61,7 +61,7 @@ def analyze():
 
     elif analysis_type == 'text_classification':
         categories = classify_text(text)
-        return jsonify(result=f'Metin sınıfı: {categories}')
+        return jsonify(result=categories)
 
     elif analysis_type == 'sentiment_analysis':
         sentiment = analyze_sentiment(text)
@@ -102,10 +102,24 @@ def analyze_text(text):
 
 
 def classify_text(text):
-    # Text classification using a transformer model
     results = classifier(text)
-    return results[0]['label']
+    categories = {}
+    entity_types = {
+        'PER': 'Kişi',
+        'LOC': 'Yer',
+        'ORG': 'Organizasyon'
+    }
 
+    for entity in results:
+        entity_type = entity['entity'].split('-')[-1]  # Eğer entity tipleri 'B-LOC', 'I-LOC' şeklindeyse son kısmı al
+        entity_text = entity['word']
+        entity_type_turkish = entity_types.get(entity_type, 'Bilinmeyen')  # Türkçeye çevir
+
+        if entity_type_turkish not in categories:
+            categories[entity_type_turkish] = []
+        categories[entity_type_turkish].append(entity_text)
+
+    return categories
 
 def analyze_sentiment(text):
     results = sentiment_analyzer(text)
