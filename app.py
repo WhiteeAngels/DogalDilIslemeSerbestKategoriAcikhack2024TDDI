@@ -3,10 +3,11 @@ from transformers import pipeline,AutoModelForTokenClassification, AutoModelForS
 from gtts import gTTS
 import os
 import playsound
+import re
 
 app = Flask(__name__)
 
-# Transformer model pipeline'ları
+ # Transformer model pipeline'ları
 classifier = pipeline("ner", model="akdeniz27/convbert-base-turkish-cased-ner")
 text_analysis_pipeline = pipeline("feature-extraction", model="dbmdz/bert-base-turkish-cased")
 
@@ -55,8 +56,8 @@ def analyze():
     analysis_type = data.get('type')
 
     if analysis_type == 'text_analysis':
-        word_count = len(text.split())
-        return jsonify(result=f'Metin {word_count} kelime içeriyor.')
+        analysis_result = analyze_text(text)
+        return jsonify(result=analysis_result)
 
     elif analysis_type == 'text_classification':
         categories = classify_text(text)
@@ -74,6 +75,31 @@ def analyze():
         return jsonify(result='Soru belirtilmedi.')
 
     return jsonify(result='Geçersiz analiz türü.')
+
+def analyze_text(text):
+    # Kelime ve karakter sayısı analizi
+    words = text.split()
+    word_count = len(words)
+    character_count = len(text)
+
+    # Cümle sayısı analizi
+    sentences = re.split(r'[.!?]', text)
+    sentence_count = len([s for s in sentences if s.strip() != ""])
+
+    # Ortalama kelime uzunluğu
+    if word_count > 0:
+        average_word_length = sum(len(word) for word in words) / word_count
+    else:
+        average_word_length = 0
+
+    analysis_result = (
+        f"Kelime Sayısı: {word_count}\n"
+        f"Karakter Sayısı: {character_count}\n"
+        f"Cümle Sayısı: {sentence_count}\n"
+        f"Ortalama Kelime Uzunluğu: {average_word_length:.2f}"
+    )
+    return analysis_result
+
 
 def classify_text(text):
     # Text classification using a transformer model

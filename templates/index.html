@@ -4,9 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>WhiteAngels Akıllı Metin Analiz Platformu</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <style>
-  body {
+        body {
             font-family: Arial, sans-serif;
             margin: 0;
             padding: 0;
@@ -189,11 +189,11 @@
 </head>
 <body>
     <div class="navbar">
-        <button onclick="showAbout()">Hakkında</button>
-        <a href="#home">Ana Sayfa</a>
-        <button onclick="toggleMode()">Gece/Gündüz Modu</button>
+        <button class="about-button" onclick="showAbout()">Hakkında</button>
+        <a class="home-button" href="#home">Ana Sayfa</a>
+        <button class="dark-mode-button" onclick="toggleMode()">Gece/Gündüz Modu</button>
     </div>
-    <h1>WhiteAngels Platformu</h1>
+    <h1 style="text-align: center; margin: 20px 0;">WhiteAngels Platformu</h1>
     <div class="container">
         <div id="section1" class="section">
             <h2>Metin Analizi</h2>
@@ -249,116 +249,89 @@
                 White Angels'ın projeleri sadece teknik bilgi ve becerilerini sergilemekle kalmaz, aynı zamanda ekip çalışması ve liderlik yeteneklerini de geliştirir. Bu gençler, hem akademik hayatlarında hem de profesyonel kariyerlerinde başarıya ulaşmak için kararlılıkla ilerlemektedir.
             </p>
             <p>
-                White Angels'ın bir sonraki adımı, yaratıcılıklarını ve teknik becerilerini daha geniş bir kitleye tanıtmak ve endüstriye katkı sağlamaktır. Her biri kendi alanında uzmanlaşan bu genç mühendisler, gelecekte teknoloji dünyasında önemli bir rol oynamaya adaydır.
+                White Angels'ın bir sonraki adımı, yaratıcılıklarını ve teknik becerilerini daha geniş bir kitleye tanıtmak ve endüstriye katkı sağlamaktır. Her biri kendi alanında uzmanlaşan bu genç mühendisler, gelecekte teknoloji dünyasında önemli bir rol oynamayı hedeflemektedir.
             </p>
             <p>
-                Bu genç ve dinamik ekip, sadece bilgisayar mühendisliği değil, aynı zamanda inovasyon ve işbirliği ruhunu da temsil etmektedir. White Angels, teknolojiye olan bağlılıkları ve sürekli öğrenme istekleriyle, geleceğin teknoloji liderleri olma yolunda emin adımlarla ilerlemektedir.
+                White Angels hakkında daha fazla bilgi almak için bizimle iletişime geçebilirsiniz.
             </p>
         </div>
     </div>
 
+    <div class="footer">
+        WhiteAngels © 2024
+    </div>
+
     <script>
+        function toggleMode() {
+            document.body.classList.toggle("dark-mode");
+        }
+
         function showAbout() {
-            document.getElementById('about-overlay').style.display = 'flex';
+            document.getElementById("about-overlay").style.display = "block";
         }
 
         function closeAbout() {
-            document.getElementById('about-overlay').style.display = 'none';
+            document.getElementById("about-overlay").style.display = "none";
         }
 
-        function toggleMode() {
-            document.body.classList.toggle('dark-mode');
-        }
-
-        function dimSections(activeSection) {
+        function dimSections(exceptSectionId) {
             for (let i = 1; i <= 6; i++) {
-                let section = document.getElementById(`section${i}`);
-                if (i === activeSection) {
-                    section.classList.remove('dimmed');
+                let section = document.getElementById('section' + i);
+                if (i !== exceptSectionId) {
+                    section.classList.add("dimmed");
                 } else {
-                    section.classList.add('dimmed');
+                    section.classList.remove("dimmed");
                 }
             }
         }
 
-        function analyzeText() {
-            const text = document.getElementById('text-analysis').value;
-            fetch('/analyze', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ text: text, type: 'text_analysis' })
-            }).then(response => response.json())
-              .then(data => alert(data.result))
-              .catch(error => console.error('Error:', error));
-        }
+        // Metin analizi işlevi
+function analyzeText() {
+    const text = document.getElementById('text-analysis').value;
+    if (text.trim() === "") {
+        alert("Lütfen metin giriniz.");
+        return;
+    }
+    fetch('/analyze', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ text: text, type: 'text_analysis' })
+    })
+    .then(response => response.json())
+    .then(data => {
+        alert(data.result);
+    });
+}
+
 
         function classifyText() {
-            const text = document.getElementById('text-classification').value;
-            fetch('/analyze', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ text: text, type: 'text_classification' })
-            }).then(response => response.json())
-              .then(data => alert(data.result))
-              .catch(error => console.error('Error:', error));
+            let text = document.getElementById("text-classification").value;
+            alert("Metin Sınıflandırma: " + text);
         }
 
         function analyzeSentiment() {
-            const text = document.getElementById('sentiment-analysis').value;
-            fetch('/analyze', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ text: text, type: 'sentiment_analysis' })
-            }).then(response => response.json())
-              .then(data => alert(data.result))
-              .catch(error => console.error('Error:', error));
+            let text = document.getElementById("sentiment-analysis").value;
+            alert("Duygu Analizi: " + text);
         }
 
         function answerQuestion() {
-            const text = document.getElementById('qa-context').value;
-            const question = document.getElementById('qa-question').value;
-            fetch('/analyze', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ text: text, type: 'question_answering', question: question })
-            }).then(response => response.json())
-              .then(data => alert(data.result))
-              .catch(error => console.error('Error:', error));
+            let context = document.getElementById("qa-context").value;
+            let question = document.getElementById("qa-question").value;
+            alert("Soru: " + question + "\nBağlam: " + context);
         }
 
         function readText() {
-            const text = document.getElementById('text-to-read').value;
-            if (text.trim() === "") {
-                alert("Metin boş. Lütfen bir metin girin.");
-                return;
-            }
-
-            const utterance = new SpeechSynthesisUtterance(text);
-            speechSynthesis.speak(utterance);
+            let text = document.getElementById("text-to-read").value;
+            alert("Metin Okuma: " + text);
         }
 
-         function searchProducts() {
-        const products = document.getElementById('product-search').value;
-        fetch('/search_products', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ products: products })
-        }).then(response => response.json())
-          .then(data => {
-            const resultsDiv = document.getElementById('search-results');
-            if (data.results && data.results.length > 0) {
-                let resultsHtml = '<h3>Sonuçlar:</h3>';
-                data.results.forEach(result => {
-                    resultsHtml += `<p>Mağaza: ${result.store}<br>Ürünler: ${result.products.join(', ')}</p>`;
-                });
-                resultsDiv.innerHTML = resultsHtml;
-            } else {
-                resultsDiv.innerHTML = '<p>İstediğiniz ürünlerin hepsini tek bir mağazada bulamadık.</p>';
-            }
-          })
-          .catch(error => console.error('Error:', error));
-    }
+        function searchProducts() {
+            let text = document.getElementById("product-search").value;
+            alert("Ürün Arama: " + text);
+            document.getElementById("search-results").innerText = "Arama sonuçları burada gösterilecek.";
+        }
     </script>
-
 </body>
 </html>
