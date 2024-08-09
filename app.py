@@ -4,6 +4,8 @@ from gtts import gTTS
 import os
 import playsound
 import re
+import pandas as pd
+from datasets import load_dataset
 
 app = Flask(__name__)
 
@@ -23,12 +25,11 @@ qa_tokenizer = AutoTokenizer.from_pretrained(qa_model_name)
 qa_model = AutoModelForQuestionAnswering.from_pretrained(qa_model_name)
 qa_pipeline = pipeline("question-answering", model=qa_model, tokenizer=qa_tokenizer)
 
-# Örnek mağaza ve ürün verileri
-stores_products = {
-    "Nike": ["top", "ayakkabı", "çanta", "forma", "racket", "toka"],
-    "Ikea": ["sandalye", "tornavida", "matkap", "çadır"],
-    "Mediamarkt": ["cep telefonu", "laptop", "mouse", "kulaklık", "tablet bilgisayar"]
-}
+# Veri setini yükle ve işleme
+dataset = load_dataset("WhiteAngelss/magaza-urun-listesi-with-links", split='train')
+df = pd.DataFrame(dataset)
+df = df['Mağaza;Ürün;Link'].str.split(';', expand=True)
+df.columns = ['Mağaza', 'Ürün', 'Link']
 
 # Yeni Metin Sınıflandırma Modeli
 text_classification_model_name = "dbmdz/bert-base-turkish-cased"
@@ -131,21 +132,49 @@ def answer_question(text, question):
     result = qa_pipeline({'context': text, 'question': question})
     return result['answer']
 
+
+def find_stores_with_products(products, df):
+    # Mağaza bazında ürünleri ve linkleri gruplandır
+    store_products_links = df.groupby('Mağaza').agg(
+        {'Ürün': lambda x: list(x), 'Link': lambda x: list(x)}
+    ).reset_index()
+
+    # Mağaza-Ürün-Link şeklinde bir sözlük oluştur
+    store_products_dict = store_products_links.set_index('Mağaza').to_dict('index')
+
+    # Girilen ürünleri barındıran mağazaları bul
+    matching_stores = {}
+    for store, details in store_products_dict.items():
+        store_products = details['Ürün']
+        store_links = details['Link']
+
+        # Ürünlerin hepsi mağazada var mı?
+        if all(prod in store_products for prod in products):
+            matching_products = []
+            matching_links = []
+            for product in products:
+                idx = store_products.index(product)
+                matching_products.append(store_products[idx])
+                matching_links.append(store_links[idx])
+            matching_stores[store] = {'products': matching_products, 'links': matching_links}
+
+    return matching_stores
+
+
+
+
 @app.route('/search_products', methods=['POST'])
 def search_products():
     data = request.json
-    requested_products = data.get('products', '')
-    requested_products = [p.strip() for p in requested_products.split(',')]
+    products = [product.strip() for product in data.get('products', '').split(',')]
+    matching_stores = find_stores_with_products(products, df)
 
-    results = []
-    for store, products in stores_products.items():
-        if all(product in products for product in requested_products):
-            results.append({'store': store, 'products': requested_products})
-
-    if results:
+    if matching_stores:
+        results = [{'store': store, 'products': details['products'], 'links': details['links']} for store, details in
+                   matching_stores.items()]
         return jsonify({'results': results})
     else:
-        return jsonify({'results': 'İstediğiniz ürünlerin hepsini tek bir mağazada bulamadık.'})
+        return jsonify({'results': []})
 
 if __name__ == '__main__':
     app.run(debug=True)

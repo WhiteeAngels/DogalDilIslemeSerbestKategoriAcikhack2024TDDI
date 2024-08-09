@@ -228,9 +228,9 @@
 
         <div id="section6" class="section">
             <h2>Ürün Arama</h2>
-            <textarea id="product-search" placeholder="Almak istediğiniz ürünleri virgülle ayırarak giriniz..." onclick="dimSections(6)"></textarea>
-            <button onclick="searchProducts()">Ara</button>
-            <div id="search-results" class="results"></div>
+        <input type="text" id="product-search" placeholder="Ürünleri virgülle ayırarak girin" onclick="dimSections(6)">
+        <button onclick="searchProducts()">Ara</button>
+        <div id="search-results"></div>
         </div>
     </div>
 
@@ -372,28 +372,43 @@ function analyzeText() {
             const utterance = new SpeechSynthesisUtterance(text);
             speechSynthesis.speak(utterance);
         }
+function searchProducts() {
+    const products = document.getElementById('product-search').value;
 
-        function searchProducts() {
-        const products = document.getElementById('product-search').value;
-        fetch('/search_products', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ products: products })
-        }).then(response => response.json())
-          .then(data => {
-            const resultsDiv = document.getElementById('search-results');
-            if (data.results && data.results.length > 0) {
-                let resultsHtml = '<h3>Sonuçlar:</h3>';
-                data.results.forEach(result => {
-                    resultsHtml += `<p>Mağaza: ${result.store}<br>Ürünler: ${result.products.join(', ')}</p>`;
-                });
-                resultsDiv.innerHTML = resultsHtml;
-            } else {
-                resultsDiv.innerHTML = '<p>İstediğiniz ürünlerin hepsini tek bir mağazada bulamadık.</p>';
-            }
-          })
-          .catch(error => console.error('Error:', error));
-    }
+    fetch('/search_products', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ products: products })
+    })
+    .then(response => response.json())
+    .then(data => {
+        const resultsDiv = document.getElementById('search-results');
+        resultsDiv.innerHTML = ''; // Önceki sonuçları temizle
+
+        if (data.results && data.results.length > 0) {
+            let resultsHtml = '<h3>Sonuçlar:</h3>';
+            data.results.forEach(result => {
+                resultsHtml += `
+                    <div class="result-item">
+                        <p><strong>Mağaza:</strong> ${result.store}</p>
+                        <p><strong>Ürünler:</strong> ${result.products.join(', ')}</p>
+                        <p><strong>Linkler:</strong> ${result.links.map(link => `<a href="${link}" target="_blank">Ürün Linki</a>`).join(', ')}</p>
+                    </div>
+                `;
+            });
+            resultsDiv.innerHTML = resultsHtml;
+        } else {
+            resultsDiv.innerHTML = '<p>İstediğiniz ürünlerin hepsini tek bir mağazada bulamadık.</p>';
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        const resultsDiv = document.getElementById('search-results');
+        resultsDiv.innerHTML = '<p>Bir hata oluştu, lütfen tekrar deneyin.</p>';
+    });
+}
+
+
     </script>
 </body>
 </html>

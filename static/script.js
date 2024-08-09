@@ -128,11 +128,7 @@ function readText() {
 
 // Ürün arama işlevi
 function searchProducts() {
-    const products = document.getElementById('product-search').value.split(',').map(p => p.trim().toLowerCase());
-    if (products.length === 0 || products[0] === "") {
-        alert("Lütfen ürün giriniz.");
-        return;
-    }
+    const products = document.getElementById('product-search').value;
 
     fetch('/search_products', {
         method: 'POST',
@@ -143,23 +139,22 @@ function searchProducts() {
     .then(data => {
         const resultsDiv = document.getElementById('search-results');
         resultsDiv.innerHTML = ''; // Önceki sonuçları temizle
-        if (data.results && Array.isArray(data.results) && data.results.length > 0) {
+
+        if (data.results && data.results.length > 0) {
+            let resultsHtml = '<h3>Sonuçlar:</h3>';
             data.results.forEach(result => {
-                // Her bir ürün ve mağaza sonucunu bir HTML elemanı olarak ekleyin
-                const resultElement = document.createElement('div');
-                resultElement.classList.add('result-item');
-                resultElement.textContent = `Ürünler mevcut: ${result.store}`;
-                resultsDiv.appendChild(resultElement);
+                resultsHtml += `<div class="result-item">
+                                    <p><strong>Mağaza:</strong> ${result.store}</p>
+                                    <p><strong>Ürünler:</strong> ${result.products.join(', ')}</p>
+                                    <p><strong>Linkler:</strong> ${result.links.map(link => `<a href="${link}" target="_blank">Ürün Linki</a>`).join(', ')}</p>
+                                </div>`;
             });
+            resultsDiv.innerHTML = resultsHtml;
         } else {
-            resultsDiv.innerHTML = "<p>Ürün bulunamadı.</p>";
+            resultsDiv.innerHTML = '<p>İstediğiniz ürünlerin hepsini tek bir mağazada bulamadık.</p>';
         }
     })
-    .catch(error => {
-        console.error('Error:', error);
-        const resultsDiv = document.getElementById('search-results');
-        resultsDiv.innerHTML = "<p>Bir hata oluştu. Lütfen tekrar deneyin.</p>";
-    });
+    .catch(error => console.error('Error:', error));
 }
 
 function readText() {
